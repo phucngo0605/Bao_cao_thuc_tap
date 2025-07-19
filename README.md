@@ -622,72 +622,103 @@ BASE là mô hình thiết kế cho hệ thống NoSQL, ưu tiên khả năng m�
 ## 1. Apache Spark
 
 ### 1.1. Apache Spark là gì?
-Apache Spark là một nền tảng tính toán cụm mã nguồn mở, được thiết kế để xử lý dữ liệu lớn theo phương thức **batch processing** (xử lý hàng loạt) và **streaming** (xử lý luồng). Spark nổi bật với khả năng xử lý dữ liệu trong bộ nhớ (in-memory), giúp tăng tốc độ xử lý so với các hệ thống truyền thống như Hadoop MapReduce.
+Apache Spark là một nền tảng tính toán phân tán mã nguồn mở, được thiết kế để xử lý dữ liệu lớn theo hai phương thức chính: **batch processing** (xử lý hàng loạt) và **streaming** (xử lý luồng). Spark nổi bật nhờ khả năng xử lý dữ liệu trong bộ nhớ (in-memory), giúp tăng tốc độ xử lý lên đến 100 lần so với Hadoop MapReduce trong một số trường hợp. Nó được sử dụng rộng rãi trong các ứng dụng như phân tích dữ liệu, học máy, xử lý đồ thị, và xử lý luồng thời gian thực.
 
-- **Đặc điểm chính**:
-  - **Xử lý trong bộ nhớ**: Dữ liệu được lưu trữ và xử lý trong RAM, chỉ ghi ra đĩa khi cần thiết, giúp tăng hiệu suất đáng kể.
-  - **API dễ sử dụng**: Hỗ trợ nhiều ngôn ngữ lập trình như Python (PySpark), Scala, Java và R.
-  - **Khả năng mở rộng**: Hoạt động trên cụm máy tính với hàng ngàn node, phù hợp cho Big Data.
-  - **Tích hợp đa dạng**: Hỗ trợ xử lý dữ liệu có cấu trúc, không cấu trúc, học máy, xử lý đồ thị và streaming.
+![Apache Spark Overview](https://www.apache.org/images/spark-logo.png)
+*Hình 1: Logo Apache Spark, một hình ảnh biểu tượng màu đen với chữ "Spark" được cách điệu, đại diện cho nền tảng xử lý dữ liệu lớn mạnh mẽ.*
+
+**Đặc điểm chính**:
+- **In-Memory Computing**: Lưu trữ và xử lý dữ liệu trong RAM, chỉ ghi ra đĩa khi cần thiết, giảm đáng kể thời gian xử lý.
+- **Lazy Evaluation**: Các phép biến đổi (transformations) được lưu trữ dưới dạng kế hoạch và chỉ thực thi khi có hành động (action), giúp tối ưu hóa hiệu suất.
+- **Multi-language Support**: Hỗ trợ nhiều ngôn ngữ lập trình như Python (PySpark), Scala, Java, và R, với các API như RDD, DataFrame, và SQL.
+- **Khả năng mở rộng**: Hoạt động trên cụm máy tính với hàng ngàn node, xử lý khối lượng dữ liệu từ gigabyte đến petabyte.
+- **Tích hợp đa dạng**: Tích hợp với các hệ thống lưu trữ như HDFS, S3, Cassandra, và các công cụ như Hive, Kafka.
 
 ### 1.2. Các thành phần chính của Apache Spark
-- **Spark Core**: Lõi của Spark, cung cấp các chức năng cơ bản như quản lý bộ nhớ, lập lịch task, xử lý lỗi và tương tác với hệ thống lưu trữ.
-- **Spark SQL**: Hỗ trợ xử lý dữ liệu có cấu trúc bằng cách sử dụng SQL, DataFrame và Dataset API. Tích hợp với các nguồn dữ liệu như Hive, JSON, Parquet.
-- **Spark Streaming**: Cho phép xử lý dữ liệu thời gian thực bằng mô hình micro-batch.
-- **MLlib**: Thư viện học máy tích hợp, hỗ trợ các thuật toán như phân loại, hồi quy, cụm hóa và học sâu.
-- **GraphX**: Thư viện xử lý đồ thị, phù hợp cho các ứng dụng như phân tích mạng xã hội hoặc đồ thị quan hệ.
+Apache Spark cung cấp một hệ sinh thái mạnh mẽ với các module chính, mỗi module phục vụ một mục đích cụ thể trong xử lý dữ liệu:
+
+![Spark Components](https://databricks.com/wp-content/uploads/2023/01/spark-architecture-diagram.png)
+*Hình 2: Một sơ đồ minh họa các thành phần của Apache Spark, bao gồm Spark Core (lõi), Spark SQL (xử lý SQL), Spark Streaming (xử lý luồng), MLlib (học máy), và GraphX (xử lý đồ thị), được sắp xếp theo tầng lớp để thể hiện mối quan hệ giữa chúng.*
+
+1. **Spark Core**: Lõi của Spark, cung cấp các chức năng cơ bản như quản lý bộ nhớ, lập lịch task, xử lý lỗi, và tương tác với các hệ thống lưu trữ (HDFS, S3, v.v.).
+2. **Spark SQL**: Hỗ trợ xử lý dữ liệu có cấu trúc và bán cấu trúc thông qua SQL, DataFrame, và Dataset API. Tích hợp với các nguồn dữ liệu như Hive, JSON, Parquet.
+3. **Spark Streaming**: Cho phép xử lý dữ liệu thời gian thực bằng mô hình micro-batch, phù hợp với các ứng dụng như giám sát hệ thống hoặc phân tích luồng dữ liệu.
+4. **MLlib**: Thư viện học máy tích hợp, cung cấp các thuật toán như phân loại, hồi quy, cụm hóa, và học sâu.
+5. **GraphX**: Thư viện xử lý đồ thị, hỗ trợ các ứng dụng như phân tích mạng xã hội, đồ thị quan hệ, hoặc tìm kiếm đường đi ngắn nhất.
 
 ### 1.3. Kiến trúc vật lý của Spark
-Spark hoạt động theo mô hình **Master-Slave**:
+Spark hoạt động theo mô hình **Master-Slave**, với các thành phần chính phối hợp để thực hiện tính toán phân tán:
 
-- **Driver Program** (chạy trên Master Node): 
-  - Là chương trình chính, điều khiển toàn bộ ứng dụng Spark.
-  - Tạo **Spark Context**, quản lý và phân phối công việc đến các node trong cụm.
-  - Chịu trách nhiệm lập lịch và giám sát các task.
+![Spark Physical Architecture](https://spark.apache.org/docs/latest/img/cluster-overview.png)
+*Hình 3: Một sơ đồ kiến trúc vật lý của Spark, cho thấy Driver Program trên Master Node (trung tâm điều phối), Cluster Manager (quản lý tài nguyên), và các Executor trên Worker Nodes (thực thi task), được kết nối qua các đường nét thể hiện luồng dữ liệu và lệnh.*
 
-- **Cluster Manager**: 
+- **Driver Program** (chạy trên Master Node):
+  - Là chương trình chính, chịu trách nhiệm điều phối toàn bộ ứng dụng Spark.
+  - Tạo **SparkContext**, giao tiếp với Cluster Manager để phân phối công việc và quản lý tài nguyên.
+  - Lập lịch và giám sát các task trong cụm, thu thập kết quả từ các Executor.
+- **Cluster Manager**:
   - Quản lý tài nguyên (CPU, RAM) trên các node trong cụm.
-  - Phân phối executor đến các Worker Node.
-  - Ví dụ: YARN, Mesos, hoặc Spark Standalone.
-
+  - Phân phối **Executor** đến các Worker Node để thực hiện các task.
+  - Hỗ trợ nhiều loại Cluster Manager như YARN, Mesos, hoặc Spark Standalone.
 - **Executor** (chạy trên Worker Nodes):
-  - Tiến trình thực thi các task được giao từ Driver.
-  - Mỗi executor xử lý dữ liệu trên một phân vùng (partition) của tập dữ liệu.
-  - Trả kết quả về Driver sau khi hoàn thành.
+  - Là các tiến trình chạy trên Worker Node, thực thi các task được giao từ Driver.
+  - Mỗi Executor xử lý một hoặc nhiều phân vùng (partition) của dữ liệu.
+  - Lưu trữ dữ liệu trong bộ nhớ hoặc đĩa, thực hiện tính toán song song, và trả kết quả về Driver.
 
-**Hình minh họa kiến trúc vật lý của Spark**:
-![Spark Architecture](https://spark.apache.org/docs/latest/img/cluster-overview.png)
+**Quy trình hoạt động**:
+1. Driver Program phân vùng dữ liệu và gửi các phân vùng đến các Executor.
+2. Mỗi Executor thực hiện tính toán trên phân vùng dữ liệu được giao, tận dụng tính song song.
+3. Executor trả kết quả về Driver Program, hoặc lưu kết quả vào hệ thống lưu trữ theo yêu cầu.
 
 ### 1.4. Kiến trúc logic
-- **User Layer**: Người dùng viết mã bằng RDD API, DataFrame API hoặc SQL API thông qua các ngôn ngữ như Python, Scala, Java, hoặc R.
-- **Catalyst Optimizer**: Bộ tối ưu hóa logic cho DataFrame/Dataset:
-  - Chuyển mã người dùng thành **Logical Plan**.
-  - Tối ưu hóa Logical Plan (ví dụ: sắp xếp lại phép toán, loại bỏ thao tác dư thừa).
-- **Physical Plan**: Catalyst Optimizer sinh ra nhiều Physical Plan, sau đó chọn plan tối ưu nhất để thực thi.
-- **DAG Scheduler**: Chuyển Physical Plan thành **Directed Acyclic Graph (DAG)**, chia thành các **Stage** (tập hợp các task có thể thực thi song song).
-- **Task Scheduler**: Gửi các task từ mỗi Stage đến các Executor để xử lý song song.
+Kiến trúc logic của Spark mô tả cách mã người dùng được xử lý và tối ưu hóa trước khi thực thi:
 
-**Hình minh họa kiến trúc logic của Spark**:
-![Spark Logical Architecture](https://spark.apache.org/docs/latest/img/sql-architecture.png)
+![Spark Logical Architecture](https://databricks.com/wp-content/uploads/2023/01/spark-logical-architecture.png)
+*Hình 4: Một sơ đồ kiến trúc logic của Spark, thể hiện các lớp từ User Layer (mã người dùng), qua Catalyst Optimizer (tối ưu hóa logic), Physical Plan (kế hoạch vật lý), DAG Scheduler (lập lịch đồ thị), đến Task Scheduler (phân phối task), với các mũi tên cho thấy luồng xử lý.*
+
+1. **User Layer**:
+   - Người dùng viết mã bằng RDD API, DataFrame API, hoặc SQL API thông qua các ngôn ngữ như Python, Scala, Java, hoặc R.
+   - Ví dụ: Lọc dữ liệu trong DataFrame hoặc thực hiện truy vấn SQL.
+2. **Catalyst Optimizer**:
+   - Chuyển mã người dùng thành **Logical Plan**, biểu diễn các phép toán dưới dạng cây logic.
+   - Tối ưu hóa Logical Plan bằng cách sắp xếp lại các phép toán, loại bỏ thao tác dư thừa, hoặc áp dụng dự đoán điều kiện (predicate pushdown).
+3. **Physical Plan**:
+   - Catalyst Optimizer sinh ra nhiều Physical Plan từ Logical Plan.
+   - Chọn plan tối ưu nhất dựa trên chi phí tính toán, sử dụng thống kê về dữ liệu và tài nguyên.
+4. **DAG Scheduler**:
+   - Biến Physical Plan thành **Directed Acyclic Graph (DAG)**.
+   - Chia DAG thành các **Stage**, mỗi Stage là tập hợp các task có thể thực thi song song.
+5. **Task Scheduler**:
+   - Phân phối các task từ mỗi Stage đến các Executor để xử lý song song.
+   - Đảm bảo dữ liệu được xử lý cục bộ (data locality) để giảm chi phí truyền dữ liệu qua mạng.
 
 ### 1.5. RDD (Resilient Distributed Dataset)
-- **Định nghĩa**: RDD là tập dữ liệu phân tán, bất biến, chịu lỗi, được phân chia trên nhiều node trong cụm để xử lý song song.
-- **Đặc điểm**:
-  - **Phân vùng (Partition)**: Dữ liệu được chia thành các khối nhỏ (partition) để xử lý song song.
-  - **Phụ thuộc (Dependencies)**: Lưu trữ thông tin dòng dõi (lineage) để tái tạo dữ liệu nếu mất.
-  - **Tính toán**: Áp dụng các hàm chuyển đổi (transformations) từ RDD cha.
-  - **Vị trí ưu tiên**: Gợi ý nơi lưu trữ partition để tối ưu hóa xử lý cục bộ.
-  - **Trình phân vùng**: Xác định cách dữ liệu được chia thành các partition.
-  - **Bất biến**: Không thể sửa đổi RDD, chỉ có thể tạo RDD mới qua các phép biến đổi.
-- **Quy trình làm việc với RDD**:
-  1. Tạo RDD (từ file, cơ sở dữ liệu, hoặc dữ liệu trong bộ nhớ).
-  2. Áp dụng các phép **Transformation** (lọc, ánh xạ, nhóm) để tạo RDD mới.
-  3. Thực hiện **Action** (đếm, lưu trữ, hiển thị) để lấy kết quả.
+- **Định nghĩa**: RDD là tập dữ liệu phân tán, bất biến, chịu lỗi, được chia thành các phân vùng (partition) để xử lý song song trên nhiều node trong cụm. RDD là nền tảng cốt lõi của Spark, cung cấp khả năng xử lý dữ liệu phân tán mạnh mẽ.
+
+![RDD Concept](https://databricks.com/wp-content/uploads/2016/06/rdd-dependency-graph.png)
+*Hình 5: Một sơ đồ minh họa cấu trúc RDD, thể hiện các phân vùng (partitions) được phân bố trên các node, cùng với thông tin dòng dõi (lineage) để tái tạo dữ liệu khi cần.*
+
+**Đặc điểm chính của RDD**:
+1. **Phân vùng (Partitions)**: Dữ liệu được chia thành các khối nhỏ (partition), mỗi partition được xử lý trên một node riêng biệt.
+2. **Phụ thuộc (Dependencies)**: Lưu trữ thông tin dòng dõi (lineage), tức là lịch sử các phép biến đổi từ RDD cha, để tái tạo dữ liệu nếu mất.
+3. **Tính toán (Compute Function)**: Áp dụng các hàm **Transformation** (như `map`, `filter`) để tạo RDD mới từ RDD hiện tại.
+4. **Vị trí ưu tiên (Preferred Locations)**: Gợi ý nơi lưu trữ partition (ví dụ: trên node nào) để tối ưu hóa xử lý cục bộ, giảm chi phí truyền dữ liệu.
+5. **Trình phân vùng (Partitioner)**: Xác định cách chia dữ liệu thành các partition, sử dụng các chiến lược như hash partitioning hoặc range partitioning.
+
+**Tính chất quan trọng**:
+- **Immutable (Bất biến)**: RDD không thể sửa đổi; mỗi phép Transformation tạo ra một RDD mới.
+- **Lazy Evaluation**: Các Transformation chỉ được ghi lại trong DAG và không thực thi cho đến khi một Action được gọi.
+- **Fault Tolerance**: Dòng dõi (lineage) cho phép Spark tái tạo dữ liệu bị mất mà không cần checkpoint, đảm bảo khả năng chịu lỗi.
+
+**Quy trình làm việc với RDD**:
+1. **Tạo RDD**: Từ nguồn dữ liệu như file (HDFS, S3), database, hoặc dữ liệu trong bộ nhớ (ví dụ: danh sách Python).
+2. **Áp dụng Transformation**: Thực hiện các phép biến đổi như `map`, `filter`, `groupBy` để tạo RDD mới.
+3. **Thực hiện Action**: Gọi các hành động như `collect`, `count`, `saveAsTextFile` để lấy kết quả hoặc lưu dữ liệu.
 
 **Ví dụ**:
 ```python
 from pyspark.sql import SparkSession
-spark = SparkSession.builder.appName("Example").getOrCreate()
+spark = SparkSession.builder.appName("RDDExample").getOrCreate()
 # Tạo RDD từ danh sách
 data = [1, 2, 3, 4, 5]
 rdd = spark.sparkContext.parallelize(data)
@@ -700,13 +731,18 @@ print(result)  # Output: [2, 4]
 
 ### 1.6. DataFrame và Dataset
 - **DataFrame**:
-  - Biểu diễn dữ liệu dưới dạng bảng với các cột được đặt tên, tương tự bảng SQL.
-  - Tận dụng Catalyst Optimizer để tối ưu hóa truy vấn.
+  - Biểu diễn dữ liệu dưới dạng bảng với các cột được đặt tên, tương tự bảng trong cơ sở dữ liệu SQL.
+  - Tận dụng Catalyst Optimizer để tối ưu hóa truy vấn, giúp truy vấn nhanh hơn so với RDD.
   - Phù hợp với Python và R, nơi kiểm soát kiểu dữ liệu không nghiêm ngặt.
 - **Dataset**:
   - Kết hợp ưu điểm của RDD (an toàn kiểu) và DataFrame (tối ưu hóa truy vấn).
-  - Chủ yếu dùng trong Scala và Java, nơi kiểm soát kiểu dữ liệu chặt chẽ.
-- **Ví dụ DataFrame**:
+  - Chủ yếu dùng trong Scala và Java, cung cấp kiểm tra kiểu tại thời điểm biên dịch.
+  - Hỗ trợ xử lý dữ liệu phức tạp với cấu trúc mạnh mẽ hơn.
+
+![DataFrame vs Dataset](https://databricks.com/wp-content/uploads/2016/07/dataframe-vs-rdd.png)
+*Hình 6: Một sơ đồ so sánh DataFrame và RDD, thể hiện DataFrame với cấu trúc bảng có cột và hàng, trong khi RDD là tập hợp các đối tượng phân tán, với chú thích về hiệu suất và tính linh hoạt.*
+
+**Ví dụ DataFrame**:
 ```python
 from pyspark.sql import SparkSession
 spark = SparkSession.builder.appName("DataFrameExample").getOrCreate()
@@ -722,64 +758,95 @@ df.show()
 # +-----+---+
 ```
 
+**So sánh DataFrame và Dataset**:
+- **DataFrame**: Dễ sử dụng, phù hợp cho dữ liệu có cấu trúc, không yêu cầu kiểm tra kiểu nghiêm ngặt.
+- **Dataset**: An toàn kiểu, phù hợp cho các ứng dụng cần kiểm tra lỗi tại thời điểm biên dịch, nhưng ít phổ biến trong Python.
+
 ### 1.7. Lazy Evaluation
-- Spark sử dụng cơ chế **Lazy Evaluation**:
-  - Các **Transformation** (như `filter`, `map`) không được thực thi ngay lập tức, mà được lưu trữ dưới dạng **DAG** (Directed Acyclic Graph).
-  - Chỉ khi một **Action** (như `collect`, `show`, `write`) được gọi, Spark mới thực thi toàn bộ chuỗi Transformation.
-  - Lợi ích: Tối ưu hóa hiệu suất bằng cách giảm số lần xử lý và đọc/ghi dữ liệu.
+- **Định nghĩa**: Spark sử dụng cơ chế **Lazy Evaluation**, trong đó các **Transformation** (như `filter`, `map`) không được thực thi ngay lập tức mà được lưu trữ dưới dạng **Directed Acyclic Graph (DAG)**.
+- **Cách hoạt động**:
+  - Khi người dùng gọi Transformation, Spark chỉ ghi lại thao tác vào DAG mà không thực hiện tính toán.
+  - Khi một **Action** (như `collect`, `show`, `write`) được gọi, Spark sẽ thực thi toàn bộ chuỗi Transformation trong DAG theo thứ tự tối ưu.
+- **Lợi ích**:
+  - **Tối ưu hóa hiệu suất**: Catalyst Optimizer có thể sắp xếp lại các thao tác, loại bỏ thao tác dư thừa, hoặc đẩy điều kiện lọc xuống nguồn dữ liệu (predicate pushdown).
+  - **Giảm chi phí I/O**: Giảm số lần đọc/ghi dữ liệu bằng cách thực thi các thao tác một cách thông minh.
+- **Ví dụ**:
+  - Trong ví dụ RDD ở trên, `rdd.filter(lambda x: x % 2 == 0)` không thực thi ngay, chỉ khi `collect()` được gọi thì Spark mới thực hiện lọc và thu thập kết quả.
 
 ## 2. Hadoop HDFS & Columnar Storage Formats (ORC, Parquet)
 
 ### 2.1. Hadoop HDFS
-- **Định nghĩa**: Hadoop Distributed File System (HDFS) là hệ thống file phân tán, được thiết kế để lưu trữ và xử lý dữ liệu lớn trên nhiều node, với khả năng chịu lỗi cao và hiệu suất đọc/ghi tuần tự tốt.
-- **Đặc điểm**:
-  - Lưu trữ dữ liệu từ gigabyte đến petabyte.
-  - Chịu lỗi bằng cách sao chép dữ liệu trên nhiều node.
-  - Tối ưu cho đọc/ghi tuần tự, không phù hợp cho đọc/ghi ngẫu nhiên.
+- **Định nghĩa**: Hadoop Distributed File System (HDFS) là hệ thống file phân tán, được thiết kế để lưu trữ dữ liệu lớn trên nhiều node với khả năng chịu lỗi cao và hiệu suất đọc/ghi tuần tự tốt. HDFS là một phần cốt lõi của hệ sinh thái Hadoop, thường được sử dụng cùng Spark hoặc MapReduce.
 
-#### Kiến trúc HDFS
+![HDFS Architecture](https://hadoop.apache.org/docs/stable/hadoop-project-dist/hadoop-hdfs/images/hdfsarchitecture.png)
+*Hình 7: Một sơ đồ kiến trúc HDFS, thể hiện NameNode (trung tâm quản lý metadata) kết nối với nhiều DataNode (lưu trữ dữ liệu), với các đường nét thể hiện luồng dữ liệu và lệnh giữa các thành phần.*
+
+**Đặc điểm**:
+- Lưu trữ dữ liệu từ gigabyte đến petabyte, phù hợp với Big Data.
+- Chịu lỗi thông qua sao chép dữ liệu (replication) trên nhiều node, mặc định là 3 bản sao.
+- Tối ưu cho đọc/ghi tuần tự, không phù hợp cho đọc/ghi ngẫu nhiên.
+- Hỗ trợ mở rộng dễ dàng bằng cách thêm node vào cụm.
+
+**Kiến trúc HDFS**:
 - **NameNode (Master)**:
-  - Quản lý **namespace** và metadata của hệ thống file.
-  - Lưu trữ thông tin về vị trí các khối dữ liệu (block).
-  - Lưu **Filesystem Tree** và **edit log** trên đĩa.
+  - Quản lý **namespace** và metadata của hệ thống file, bao gồm thông tin về vị trí các block dữ liệu.
+  - Lưu trữ **Filesystem Tree** (cấu trúc thư mục) và **edit log** (nhật ký thao tác) trên đĩa.
+  - Xử lý các thao tác như mở, đóng, đổi tên file/thư mục.
+  - Giao tiếp với client để cung cấp thông tin về vị trí block.
 - **DataNode (Worker)**:
-  - Lưu trữ dữ liệu thực tế dưới dạng các block (mặc định 64MB, có thể cấu hình).
+  - Lưu trữ dữ liệu thực tế dưới dạng các block (mặc định 64MB hoặc 128MB, có thể cấu hình).
   - Xử lý yêu cầu đọc/ghi từ client.
   - Thực hiện tạo, xóa, sao chép block theo lệnh từ NameNode.
+  - Định kỳ báo cáo trạng thái block về NameNode.
 
-**Hình minh họa kiến trúc HDFS**:
-![HDFS Architecture](https://hadoop.apache.org/docs/stable/hadoop-project-dist/hadoop-hdfs/images/hdfsarchitecture.png)
-
-#### Quy trình hoạt động
+**Quy trình hoạt động**:
 1. Client gửi yêu cầu đọc/ghi đến NameNode.
-2. NameNode trả về metadata (vị trí block trên DataNode).
+2. NameNode trả về metadata, bao gồm vị trí các block trên DataNode.
 3. Client giao tiếp trực tiếp với DataNode để đọc/ghi dữ liệu.
-4. DataNode báo cáo trạng thái block về NameNode.
+4. DataNode báo cáo trạng thái block về NameNode để đảm bảo tính nhất quán.
+
+![HDFS Blocks](https://hadoop.apache.org/docs/stable/hadoop-project-dist/hadoop-hdfs/images/hdfsdatanodes.png)
+*Hình 8: Một sơ đồ minh họa cấu trúc block trong HDFS, thể hiện cách một file được chia thành các block (màu khác nhau) và sao chép trên nhiều DataNode để đảm bảo chịu lỗi.*
 
 ### 2.2. ORC (Optimized Row Columnar)
-- **Định nghĩa**: ORC là định dạng lưu trữ dạng cột, tối ưu cho việc nén và xử lý song song trong hệ sinh thái Hadoop.
-- **Đặc điểm**:
-  - Dữ liệu được tổ chức thành các **stripe** (độc lập, chứa index, row data, footer).
-  - **Footer** chứa thống kê và metadata cho mỗi cột, hỗ trợ bỏ qua dữ liệu không cần thiết.
-  - Hỗ trợ giao dịch ACID trong Apache Hive.
-  - Phù hợp cho các tác vụ ghi dữ liệu chuyên sâu và thay đổi schema thường xuyên.
+- **Định nghĩa**: ORC là định dạng lưu trữ dạng cột, được tối ưu hóa cho việc nén và xử lý song song trong hệ sinh thái Hadoop, đặc biệt với Apache Hive. ORC được thiết kế để cải thiện hiệu suất truy vấn và tiết kiệm không gian lưu trữ.
 
-**Hình minh họa cấu trúc ORC**:
-![ORC Structure](https://orc.apache.org/docs/images/ORC-file-structure.png)
+![ORC Structure](https://orc.apache.org/docs/images/orc_file_structure_v1.png)
+*Hình 9: Một sơ đồ cấu trúc file ORC, thể hiện các stripe (dải dữ liệu) chứa index (chỉ mục), row data (dữ liệu hàng), và footer (thông tin thống kê), với các mũi tên chỉ luồng tổ chức dữ liệu.*
+
+**Đặc điểm**:
+- Dữ liệu được tổ chức thành các **stripe** (kích thước mặc định 250MB), mỗi stripe bao gồm:
+  - **Index**: Lưu trữ thông tin chỉ mục để hỗ trợ truy vấn nhanh và bỏ qua dữ liệu không cần thiết.
+  - **Row Data**: Dữ liệu thực tế được lưu trữ theo cột, tối ưu hóa cho nén và truy vấn.
+  - **Footer**: Chứa thống kê (min, max, count) và metadata cho mỗi cột.
+- Hỗ trợ giao dịch **ACID** trong Apache Hive, cho phép cập nhật và xóa dữ liệu.
+- Tối ưu cho các tác vụ ghi dữ liệu chuyên sâu và thay đổi schema thường xuyên.
+- Hỗ trợ nén dữ liệu hiệu quả (ví dụ: Zlib, Snappy) và các kỹ thuật như predicate pushdown.
+
+**Lợi ích**:
+- Giảm không gian lưu trữ nhờ nén cột.
+- Tăng tốc độ truy vấn bằng cách chỉ đọc các cột cần thiết.
+- Hỗ trợ các thống kê cột (column statistics) để tối ưu hóa truy vấn.
 
 ### 2.3. Parquet
-- **Định nghĩa**: Parquet là định dạng lưu trữ dạng cột, tối ưu hóa cho truy vấn dữ liệu lớn và xử lý dữ liệu phức tạp.
-- **Đặc điểm**:
-  - Tệp Parquet gồm **row groups**, **header**, và **footer**.
-  - Hỗ trợ nén cột và mã hóa hiệu quả.
-  - Tối ưu cho dữ liệu lồng nhau (nested data structures).
-  - Hỗ trợ cơ chế tiến hóa schema (schema evolution).
-- **Cấu trúc**:
-  - **Row Group**: Nhóm các hàng được lưu trữ cùng nhau, chứa dữ liệu cột.
-  - **Footer**: Lưu metadata về cấu trúc file và thống kê cột.
+- **Định nghĩa**: Parquet là định dạng lưu trữ dạng cột, tối ưu hóa cho truy vấn dữ liệu lớn và xử lý dữ liệu phức tạp. Parquet được sử dụng rộng rãi trong Spark, Hive, Impala, và các công cụ khác trong hệ sinh thái Hadoop.
 
-**Hình minh họa cấu trúc Parquet**:
-![Parquet Structure](https://parquet.apache.org/docs/images/FileLayout.png)
+![Parquet Structure](https://parquet.apache.org/images/FileLayout.png)
+*Hình 10: Một sơ đồ cấu trúc file Parquet, thể hiện row groups (nhóm hàng), header (đầu file), và footer (thông tin metadata), với các cột được sắp xếp để tối ưu hóa truy vấn.*
+
+**Đặc điểm**:
+- Tệp Parquet gồm:
+  - **Row Groups**: Nhóm các hàng được lưu trữ cùng nhau, mỗi nhóm chứa dữ liệu cột (column chunks).
+  - **Header**: Đánh dấu bắt đầu của file.
+  - **Footer**: Lưu metadata về cấu trúc file và thống kê cột (min, max, count).
+- Hỗ trợ nén cột và mã hóa hiệu quả (ví dụ: Snappy, Gzip).
+- Tối ưu cho dữ liệu lồng nhau (nested data structures), như JSON hoặc Avro.
+- Hỗ trợ **schema evolution**, cho phép thay đổi schema mà không phá hủy dữ liệu cũ.
+
+**Tính năng nổi bật**:
+- Tối ưu cho các tác vụ truy vấn, đặc biệt khi chỉ cần đọc một số cột nhất định.
+- Hỗ trợ các kỹ thuật tối ưu hóa truy vấn như predicate pushdown và projection pushdown.
+- Có khả năng mở rộng để hỗ trợ các cơ chế mã hóa trong tương lai.
 
 ### 2.4. So sánh ORC và Parquet
 | **Đặc điểm**              | **ORC**                                  | **Parquet**                              |
@@ -788,37 +855,105 @@ df.show()
 | **Tối ưu cho**            | Ghi dữ liệu, thay đổi schema             | Truy vấn dữ liệu, cấu trúc lồng nhau     |
 | **Nén và mã hóa**         | Tốt, tập trung vào Hive                  | Tốt, hỗ trợ nhiều hệ thống               |
 | **Hỗ trợ hệ sinh thái**   | Chủ yếu trong Hive                       | Rộng rãi (Spark, Hive, Impala, etc.)     |
+| **Hiệu suất**             | Tốt hơn cho Hive                         | Tốt hơn cho Spark                        |
 
-## 3. Batch Processing
+**Lựa chọn sử dụng**:
+- **ORC**: Phù hợp cho các hệ thống tập trung vào Hive, cần giao dịch ACID hoặc ghi dữ liệu chuyên sâu.
+- **Parquet**: Lý tưởng cho các ứng dụng Spark, cần truy vấn nhanh trên dữ liệu lồng nhau hoặc phân tích phức tạp.
 
-### 3.1. Định nghĩa
-Batch Processing là phương pháp xử lý dữ liệu theo lô (batch), trong đó dữ liệu được thu thập, lưu trữ và xử lý định kỳ (theo giờ, ngày, tuần, tháng, hoặc năm). Phù hợp cho các tác vụ phân tích dữ liệu lớn không yêu cầu thời gian thực.
+## 3. Hadoop Ecosystem
 
-### 3.2. Kiến trúc Batch Processing
+### 3.1. Hadoop Framework
+Hadoop là một framework mã nguồn mở, được viết bằng Java, dùng để xử lý dữ liệu lớn (Big Data) phân tán trên các cụm máy tính. Nó cho phép lưu trữ và xử lý dữ liệu từ gigabyte đến petabyte, sử dụng mô hình MapReduce để xử lý song song trên nhiều máy tính.
+
+![Hadoop Architecture](https://hadoop.apache.org/images/hadoop-logo.jpg)
+*Hình 11: Logo Hadoop, một hình ảnh gồm chữ "Hadoop" màu xanh lá cây với nền trắng, đại diện cho hệ sinh thái xử lý dữ liệu lớn.*
+
+**Kiến trúc của Hadoop gồm 3 lớp chính**:
+1. **HDFS (Hadoop Distributed File System)**: Hệ thống lưu trữ phân tán, cung cấp khả năng lưu trữ dữ liệu lớn với độ tin cậy cao.
+2. **MapReduce**: Framework xử lý dữ liệu song song, chia nhỏ công việc thành các task Map và Reduce.
+3. **YARN (Yet-Another-Resource-Negotiator)**: Quản lý tài nguyên và lập lịch cho các ứng dụng phân tán.
+
+### 3.2. MapReduce
+MapReduce là một framework xử lý song song, cho phép xử lý khối lượng dữ liệu lớn trên các cụm máy tính với khả năng chịu lỗi cao.
+
+![MapReduce Process](https://hadoop.apache.org/docs/stable/hadoop-mapreduce-client/images/mapreduce_architecture.png)
+*Hình 12: Một sơ đồ quy trình MapReduce, thể hiện giai đoạn Map (phân tích dữ liệu đầu vào thành cặp key/value) và Reduce (tổng hợp kết quả), với các task được phân bố trên nhiều node.*
+
+**MapReduce thực hiện 2 chức năng chính**:
+- **Map**: Tải, phân tích dữ liệu đầu vào và chuyển đổi thành các cặp key/value.
+  - Ví dụ: Đếm số lần xuất hiện của mỗi từ trong một tài liệu.
+- **Reduce**: Kết hợp các cặp key/value từ Map để tạo ra kết quả cuối cùng.
+  - Ví dụ: Tổng hợp số lần xuất hiện của mỗi từ.
+
+**Quy trình hoạt động**:
+1. Dữ liệu đầu vào được chia thành các block nhỏ.
+2. Các task Map xử lý song song trên các block, tạo ra các cặp key/value trung gian.
+3. Các cặp key/value được nhóm lại và gửi đến các task Reduce.
+4. Task Reduce tổng hợp kết quả và lưu vào hệ thống lưu trữ (HDFS, S3).
+
+### 3.3. YARN
+YARN (Yet-Another-Resource-Negotiator) là framework quản lý tài nguyên và lập lịch trong Hadoop, cho phép chạy nhiều loại ứng dụng phân tán (MapReduce, Spark, v.v.).
+
+![YARN Architecture](https://hadoop.apache.org/docs/stable/hadoop-yarn/hadoop-yarn-site/images/yarn_architecture.gif)
+*Hình 13: Một sơ đồ kiến trúc YARN, thể hiện ResourceManager (quản lý toàn cục), NodeManager (quản lý node), và ApplicationMaster (quản lý ứng dụng), với các đường nối thể hiện luồng điều phối.*
+
+**Thành phần chính**:
+- **ResourceManager**: 
+  - Quản lý toàn bộ tài nguyên tính toán của cụm (CPU, RAM, disk, network).
+  - Gồm hai thành phần: **Scheduler** (lập lịch tài nguyên) và **ApplicationManager** (quản lý ứng dụng).
+- **NodeManager**:
+  - Chạy trên mỗi node, giám sát việc sử dụng tài nguyên trong các container.
+  - Báo cáo trạng thái tài nguyên và tiến trình thực thi về ResourceManager.
+- **ApplicationMaster**:
+  - Quản lý từng ứng dụng (ví dụ: một job Spark hoặc MapReduce).
+  - Yêu cầu tài nguyên từ ResourceManager và phối hợp với NodeManager để thực thi task.
+
+**Lợi ích của YARN**:
+- Tách biệt quản lý tài nguyên và lập lịch, cải thiện khả năng mở rộng.
+- Hỗ trợ nhiều framework (Spark, MapReduce, Flink) trên cùng một cụm.
+- Tăng hiệu quả sử dụng tài nguyên và khả năng chịu lỗi.
+
+## 4. Batch Processing
+
+### 4.1. Định nghĩa
+Batch Processing là phương pháp xử lý dữ liệu theo lô, trong đó dữ liệu được thu thập, lưu trữ, và xử lý định kỳ (theo giờ, ngày, tuần, tháng, hoặc năm). Phương pháp này phù hợp cho các tác vụ phân tích dữ liệu lớn không yêu cầu thời gian thực, như báo cáo doanh thu, ETL pipeline, hoặc phân tích lịch sử.
+
+### 4.2. Kiến trúc Batch Processing
 - **Flow Architect**:
-  - Dữ liệu được thu thập từ các nguồn (database, file, API) và lưu trữ vào **file store** (như HDFS) hoặc **message queue** (như Kafka).
-  - Theo lịch trình định kỳ, dữ liệu được xử lý bằng các công cụ như Spark, Hadoop MapReduce, hoặc Hive.
-  - Kết quả được lưu vào kho dữ liệu (Data Warehouse) hoặc hệ thống lưu trữ khác.
+  - **Data Collection**: Dữ liệu được thu thập từ các nguồn như database (MySQL, PostgreSQL), file (CSV, JSON), hoặc API.
+  - **Temporary Storage**: Dữ liệu thô được lưu trữ tạm thời trong hệ thống lưu trữ như HDFS, S3, hoặc message queue như Kafka.
+  - **Scheduled Processing**: Theo lịch trình định kỳ (cron job), dữ liệu được xử lý bằng các công cụ như Spark, Hadoop MapReduce, hoặc Hive.
+  - **Output Storage**: Kết quả được lưu vào Data Warehouse (Snowflake, BigQuery) hoặc hệ thống lưu trữ khác.
 
-**Hình minh họa kiến trúc Batch Processing**:
 ![Batch Processing Flow](https://www.talend.com/wp-content/uploads/2021/03/batch-processing-diagram.png)
+*Hình 14: Một sơ đồ quy trình Batch Processing, thể hiện các giai đoạn từ thu thập dữ liệu (data collection), lưu trữ tạm thời (staging), xử lý định kỳ (processing), đến lưu kết quả vào kho dữ liệu (data warehouse), với các mũi tên chỉ luồng dữ liệu.*
 
-### 3.3. Ưu điểm của Batch Processing
-- **Hiệu quả**: Tiết kiệm tài nguyên bằng cách xử lý dữ liệu lớn cùng lúc.
-- **Đơn giản hóa**: Tự động hóa quy trình xử lý theo lịch trình, giảm can thiệp thủ công.
-- **Tính nhất quán**: Đảm bảo dữ liệu được xử lý đồng bộ và nhất quán.
-- **Phù hợp với Big Data**: Hỗ trợ xử lý khối lượng dữ liệu lớn, đặc biệt trong ETL (Extract, Transform, Load).
+**Ví dụ quy trình**:
+1. Thu thập dữ liệu giao dịch từ API bán hàng mỗi ngày.
+2. Lưu dữ liệu vào HDFS dưới dạng file Parquet.
+3. Sử dụng Spark để tổng hợp doanh thu theo sản phẩm mỗi tuần.
+4. Lưu kết quả vào Snowflake để tạo báo cáo kinh doanh.
 
-### 3.4. Nhược điểm
-- **Độ trễ cao**: Không phù hợp với các tác vụ yêu cầu phản hồi tức thời.
-- **Tài nguyên lớn**: Yêu cầu lưu trữ tạm thời và khả năng tính toán mạnh mẽ.
+### 4.3. Ưu điểm của Batch Processing
+1. **Hiệu quả**: Xử lý lượng lớn dữ liệu cùng lúc, tiết kiệm tài nguyên hệ thống so với xử lý từng bản ghi.
+2. **Đơn giản hóa**: Tự động hóa quy trình theo lịch trình, giảm can thiệp thủ công, thường sử dụng công cụ như Apache Airflow.
+3. **Tính nhất quán**: Đảm bảo dữ liệu được xử lý đồng bộ và nhất quán, đặc biệt khi tổng hợp dữ liệu từ nhiều nguồn.
+4. **Phù hợp với Big Data**: Hỗ trợ xử lý khối lượng dữ liệu lớn trong các tác vụ như ETL, báo cáo, và phân tích.
 
-### 3.5. Ví dụ ứng dụng
+### 4.4. Nhược điểm
+- **Độ trễ cao**: Kết quả chỉ có sẵn sau khi xử lý lô hoàn tất, không phù hợp cho các ứng dụng thời gian thực.
+- **Tài nguyên lớn**: Yêu cầu lưu trữ tạm thời và khả năng tính toán mạnh mẽ, đặc biệt khi xử lý dữ liệu lớn.
+- **Phức tạp trong quản lý lỗi**: Nếu lô xử lý thất bại, có thể cần chạy lại toàn bộ lô, gây tốn thời gian.
+
+### 4.5. Ví dụ ứng dụng
 - **Phân tích doanh thu hàng tháng**:
   ```sql
   SELECT MONTH(ngay), SUM(doanh_thu) AS tong_doanh_thu
   FROM fact_doanh_thu
   GROUP BY MONTH(ngay);
   ```
+  - Truy vấn này tổng hợp doanh thu theo tháng từ bảng dữ liệu giao dịch, thường được chạy trên Spark SQL hoặc Hive.
 - **ETL Pipeline**:
-  - Trích xuất dữ liệu từ CSV, biến đổi bằng Spark, tải vào Snowflake.
+  - **Extract**: Trích xuất dữ liệu từ file CSV trên HDFS.
+
