@@ -650,6 +650,7 @@ Apache Spark cung cấp một hệ sinh thái mạnh mẽ với các module chí
 
 </div>
 
+
 1. **Spark Core**: Lõi của Spark, cung cấp các chức năng cơ bản như quản lý bộ nhớ, lập lịch task, xử lý lỗi, và tương tác với các hệ thống lưu trữ (HDFS, S3, v.v.).
 2. **Spark SQL**: Hỗ trợ xử lý dữ liệu có cấu trúc và bán cấu trúc thông qua SQL, DataFrame, và Dataset API. Tích hợp với các nguồn dữ liệu như Hive, JSON, Parquet.
 3. **Spark Streaming**: Cho phép xử lý dữ liệu thời gian thực bằng mô hình micro-batch, phù hợp với các ứng dụng như giám sát hệ thống hoặc phân tích luồng dữ liệu.
@@ -659,8 +660,14 @@ Apache Spark cung cấp một hệ sinh thái mạnh mẽ với các module chí
 ### 1.3. Kiến trúc vật lý của Spark
 Spark hoạt động theo mô hình **Master-Slave**, với các thành phần chính phối hợp để thực hiện tính toán phân tán:
 
-![Spark Physical Architecture](https://spark.apache.org/docs/latest/img/cluster-overview.png)
-*Hình 3: Một sơ đồ kiến trúc vật lý của Spark, cho thấy Driver Program trên Master Node (trung tâm điều phối), Cluster Manager (quản lý tài nguyên), và các Executor trên Worker Nodes (thực thi task), được kết nối qua các đường nét thể hiện luồng dữ liệu và lệnh.*
+<div align="center">
+
+  <img src="https://spark.apache.org/docs/latest/img/cluster-overview.png" alt="Spark Physical Architecture" width="70%">
+
+  <p><em>Hình 3: Một sơ đồ kiến trúc vật lý của Spark, cho thấy Driver Program trên Master Node (trung tâm điều phối), Cluster Manager (quản lý tài nguyên), và các Executor trên Worker Nodes (thực thi task), được kết nối qua các đường nét thể hiện luồng dữ liệu và lệnh.</em></p>
+
+</div>
+
 
 - **Driver Program** (chạy trên Master Node):
   - Là chương trình chính, chịu trách nhiệm điều phối toàn bộ ứng dụng Spark.
@@ -683,7 +690,37 @@ Spark hoạt động theo mô hình **Master-Slave**, với các thành phần c
 ### 1.4. Kiến trúc logic
 Kiến trúc logic của Spark mô tả cách mã người dùng được xử lý và tối ưu hóa trước khi thực thi:
 
-![Spark Logical Architecture](https://databricks.com/wp-content/uploads/2023/01/spark-logical-architecture.png)
+```plaintext
++---------------------------+
+|        User Layer         |
+|  (RDD / DataFrame / SQL)  |
++---------------------------+
+              |
+              v
++---------------------------+
+|    Catalyst Optimizer     |
+| (Logical Plan + Optimization) |
++---------------------------+
+              |
+              v
++---------------------------+
+|       Physical Plan       |
+| (Optimized Execution Plan)|
++---------------------------+
+              |
+              v
++---------------------------+
+|        DAG Scheduler      |
+| (Build DAG, split Stages) |
++---------------------------+
+              |
+              v
++---------------------------+
+|       Task Scheduler      |
+| (Distribute tasks to      |
+|  Executors efficiently)   |
++---------------------------+
+```
 *Hình 4: Một sơ đồ kiến trúc logic của Spark, thể hiện các lớp từ User Layer (mã người dùng), qua Catalyst Optimizer (tối ưu hóa logic), Physical Plan (kế hoạch vật lý), DAG Scheduler (lập lịch đồ thị), đến Task Scheduler (phân phối task), với các mũi tên cho thấy luồng xử lý.*
 
 1. **User Layer**:
@@ -705,7 +742,43 @@ Kiến trúc logic của Spark mô tả cách mã người dùng được xử l
 ### 1.5. RDD (Resilient Distributed Dataset)
 - **Định nghĩa**: RDD là tập dữ liệu phân tán, bất biến, chịu lỗi, được chia thành các phân vùng (partition) để xử lý song song trên nhiều node trong cụm. RDD là nền tảng cốt lõi của Spark, cung cấp khả năng xử lý dữ liệu phân tán mạnh mẽ.
 
-![RDD Concept](https://databricks.com/wp-content/uploads/2016/06/rdd-dependency-graph.png)
+```plaintext
+              +----------------------------+
+              |        RDD Lineage         |
+              | (Transformations: map, etc.)|
+              +-------------+--------------+
+                            |
+                            v
+                  +------------------+
+                  |     RDD A        |
+                  | [Partitioner: Hash] |
+                  +--------+---------+
+                           |
+     +---------------------+----------------------+
+     |                     |                      |
+     v                     v                      v
++-----------+        +-----------+         +-----------+
+| Partition |        | Partition |         | Partition |
+|   A1      |        |   A2      |         |   A3      |
++-----------+        +-----------+         +-----------+
+     |                   |                      |
+     v                   v                      v
+ Worker Node 1     Worker Node 2          Worker Node 3
+ (Preferred Loc.)  (Preferred Loc.)       (Preferred Loc.)
+
+      ⋮                   ⋮                      ⋮
+
+             ===> Compute Function (e.g., map)
+
+                            |
+                            v
+                  +------------------+
+                  |     RDD B        |
+                  | [Derived from A] |
+                  +--------+---------+
+                           |
+           (Lineage tracked for fault recovery)
+```
 *Hình 5: Một sơ đồ minh họa cấu trúc RDD, thể hiện các phân vùng (partitions) được phân bố trên các node, cùng với thông tin dòng dõi (lineage) để tái tạo dữ liệu khi cần.*
 
 **Đặc điểm chính của RDD**:
@@ -749,8 +822,12 @@ print(result)  # Output: [2, 4]
   - Chủ yếu dùng trong Scala và Java, cung cấp kiểm tra kiểu tại thời điểm biên dịch.
   - Hỗ trợ xử lý dữ liệu phức tạp với cấu trúc mạnh mẽ hơn.
 
-![DataFrame vs Dataset](https://databricks.com/wp-content/uploads/2016/07/dataframe-vs-rdd.png)
-*Hình 6: Một sơ đồ so sánh DataFrame và RDD, thể hiện DataFrame với cấu trúc bảng có cột và hàng, trong khi RDD là tập hợp các đối tượng phân tán, với chú thích về hiệu suất và tính linh hoạt.*
+<p align="center">
+  <img src="https://sdmntpreastus2.oaiusercontent.com/files/00000000-d4f8-61f6-8198-225ad8f6af28/raw?se=2025-07-19T13%3A45%3A22Z&sp=r&sv=2024-08-04&sr=b&scid=5faa18db-b0e2-5925-81a1-67bec8166704&skoid=5c72dd08-68ae-4091-b4e1-40ccec0693ae&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2025-07-19T02%3A22%3A38Z&ske=2025-07-20T02%3A22%3A38Z&sks=b&skv=2024-08-04&sig=kxMdXiObLNc49G1HIu5RHCjbZEXAwPtAdvJMwOaxRbw%3D" width="500"/>
+  <br>
+  <em>Hình 6: Một sơ đồ so sánh DataFrame và RDD, thể hiện DataFrame với cấu trúc bảng có cột và hàng, trong khi RDD là tập hợp các đối tượng phân tán, với chú thích về hiệu suất và tính linh hoạt.</em>
+</p>
+
 
 **Ví dụ DataFrame**:
 ```python
@@ -821,8 +898,12 @@ df.show()
 ### 2.2. ORC (Optimized Row Columnar)
 - **Định nghĩa**: ORC là định dạng lưu trữ dạng cột, được tối ưu hóa cho việc nén và xử lý song song trong hệ sinh thái Hadoop, đặc biệt với Apache Hive. ORC được thiết kế để cải thiện hiệu suất truy vấn và tiết kiệm không gian lưu trữ.
 
-![ORC Structure](https://orc.apache.org/docs/images/orc_file_structure_v1.png)
-*Hình 9: Một sơ đồ cấu trúc file ORC, thể hiện các stripe (dải dữ liệu) chứa index (chỉ mục), row data (dữ liệu hàng), và footer (thông tin thống kê), với các mũi tên chỉ luồng tổ chức dữ liệu.*
+<p align="center">
+  <img src="https://tse3.mm.bing.net/th/id/OIP.yP3oKuvpO9o3ylgkYFaFkgHaHa?rs=1&pid=ImgDetMain&o=7&rm=3" width="400">
+  <br>
+  <em>Hình 9: Một sơ đồ cấu trúc file ORC, thể hiện các stripe (dải dữ liệu) chứa index (chỉ mục), row data (dữ liệu hàng), và footer (thông tin thống kê), với các mũi tên chỉ luồng tổ chức dữ liệu.</em>
+</p>
+
 
 **Đặc điểm**:
 - Dữ liệu được tổ chức thành các **stripe** (kích thước mặc định 250MB), mỗi stripe bao gồm:
@@ -841,8 +922,8 @@ df.show()
 ### 2.3. Parquet
 - **Định nghĩa**: Parquet là định dạng lưu trữ dạng cột, tối ưu hóa cho truy vấn dữ liệu lớn và xử lý dữ liệu phức tạp. Parquet được sử dụng rộng rãi trong Spark, Hive, Impala, và các công cụ khác trong hệ sinh thái Hadoop.
 
-![Parquet Structure](https://parquet.apache.org/images/FileLayout.png)
-*Hình 10: Một sơ đồ cấu trúc file Parquet, thể hiện row groups (nhóm hàng), header (đầu file), và footer (thông tin metadata), với các cột được sắp xếp để tối ưu hóa truy vấn.*
+![Parquet Structure](https://www.upsolver.com/wp-content/uploads/2020/05/Screen-Shot-2020-05-26-at-17.53.13.png)
+
 
 **Đặc điểm**:
 - Tệp Parquet gồm:
@@ -876,8 +957,9 @@ df.show()
 ### 3.1. Hadoop Framework
 Hadoop là một framework mã nguồn mở, được viết bằng Java, dùng để xử lý dữ liệu lớn (Big Data) phân tán trên các cụm máy tính. Nó cho phép lưu trữ và xử lý dữ liệu từ gigabyte đến petabyte, sử dụng mô hình MapReduce để xử lý song song trên nhiều máy tính.
 
-![Hadoop Architecture](https://hadoop.apache.org/images/hadoop-logo.jpg)
+![Hadoop Architecture](https://hadoop.apache.org/images/hadoop-logo.jpg)  
 *Hình 11: Logo Hadoop, một hình ảnh gồm chữ "Hadoop" màu xanh lá cây với nền trắng, đại diện cho hệ sinh thái xử lý dữ liệu lớn.*
+
 
 **Kiến trúc của Hadoop gồm 3 lớp chính**:
 1. **HDFS (Hadoop Distributed File System)**: Hệ thống lưu trữ phân tán, cung cấp khả năng lưu trữ dữ liệu lớn với độ tin cậy cao.
@@ -887,7 +969,7 @@ Hadoop là một framework mã nguồn mở, được viết bằng Java, dùng 
 ### 3.2. MapReduce
 MapReduce là một framework xử lý song song, cho phép xử lý khối lượng dữ liệu lớn trên các cụm máy tính với khả năng chịu lỗi cao.
 
-![MapReduce Process](https://hadoop.apache.org/docs/stable/hadoop-mapreduce-client/images/mapreduce_architecture.png)
+![MapReduce Process](https://storage.googleapis.com/algodailyrandomassets/curriculum/systems-design/map-reduce/example.png)
 *Hình 12: Một sơ đồ quy trình MapReduce, thể hiện giai đoạn Map (phân tích dữ liệu đầu vào thành cặp key/value) và Reduce (tổng hợp kết quả), với các task được phân bố trên nhiều node.*
 
 **MapReduce thực hiện 2 chức năng chính**:
@@ -905,8 +987,14 @@ MapReduce là một framework xử lý song song, cho phép xử lý khối lư�
 ### 3.3. YARN
 YARN (Yet-Another-Resource-Negotiator) là framework quản lý tài nguyên và lập lịch trong Hadoop, cho phép chạy nhiều loại ứng dụng phân tán (MapReduce, Spark, v.v.).
 
-![YARN Architecture](https://hadoop.apache.org/docs/stable/hadoop-yarn/hadoop-yarn-site/images/yarn_architecture.gif)
-*Hình 13: Một sơ đồ kiến trúc YARN, thể hiện ResourceManager (quản lý toàn cục), NodeManager (quản lý node), và ApplicationMaster (quản lý ứng dụng), với các đường nối thể hiện luồng điều phối.*
+<div align="center">
+
+  <img src="https://raw.githubusercontent.com/minhnguyen2804/Bao-Cao-Thuc-Tap-Nguyen-Ngoc-Minh/refs/heads/main/image/yarn.png" alt="YARN Architecture" width="600">
+
+  <p><em>Hình 13: Một sơ đồ kiến trúc YARN, thể hiện ResourceManager (quản lý toàn cục), NodeManager (quản lý node), và ApplicationMaster (quản lý ứng dụng), với các đường nối thể hiện luồng điều phối.</em></p>
+
+</div>
+
 
 **Thành phần chính**:
 - **ResourceManager**: 
@@ -936,7 +1024,7 @@ Batch Processing là phương pháp xử lý dữ liệu theo lô, trong đó d�
   - **Scheduled Processing**: Theo lịch trình định kỳ (cron job), dữ liệu được xử lý bằng các công cụ như Spark, Hadoop MapReduce, hoặc Hive.
   - **Output Storage**: Kết quả được lưu vào Data Warehouse (Snowflake, BigQuery) hoặc hệ thống lưu trữ khác.
 
-![Batch Processing Flow](https://www.talend.com/wp-content/uploads/2021/03/batch-processing-diagram.png)
+![Batch Processing Flow](https://vectormine.b-cdn.net/wp-content/uploads/batch_processing_outline_diagram-1.jpg)
 *Hình 14: Một sơ đồ quy trình Batch Processing, thể hiện các giai đoạn từ thu thập dữ liệu (data collection), lưu trữ tạm thời (staging), xử lý định kỳ (processing), đến lưu kết quả vào kho dữ liệu (data warehouse), với các mũi tên chỉ luồng dữ liệu.*
 
 **Ví dụ quy trình**:
@@ -955,15 +1043,176 @@ Batch Processing là phương pháp xử lý dữ liệu theo lô, trong đó d�
 - **Độ trễ cao**: Kết quả chỉ có sẵn sau khi xử lý lô hoàn tất, không phù hợp cho các ứng dụng thời gian thực.
 - **Tài nguyên lớn**: Yêu cầu lưu trữ tạm thời và khả năng tính toán mạnh mẽ, đặc biệt khi xử lý dữ liệu lớn.
 - **Phức tạp trong quản lý lỗi**: Nếu lô xử lý thất bại, có thể cần chạy lại toàn bộ lô, gây tốn thời gian.
+# Tuần 4 – Apache Kafka và Xử lý Dữ liệu Thời gian thực
 
-### 4.5. Ví dụ ứng dụng
-- **Phân tích doanh thu hàng tháng**:
-  ```sql
-  SELECT MONTH(ngay), SUM(doanh_thu) AS tong_doanh_thu
-  FROM fact_doanh_thu
-  GROUP BY MONTH(ngay);
+## 1. Apache Kafka
+
+### 1.1. Apache Kafka là gì?
+Apache Kafka là một hệ thống xử lý dữ liệu thời gian thực mã nguồn mở, được tạo ra tại LinkedIn và sau đó được phát triển bởi Apache Software Foundation. Nó đã trở thành một phần quan trọng của cơ sở hạ tầng cho các ứng dụng xử lý dữ liệu lớn và phân tán.
+
+Kafka ra đời để giải quyết các thách thức liên quan đến:
+- Xử lý dữ liệu thời gian thực.
+- Lưu trữ log (message log) hiệu quả.
+- Chia sẻ dữ liệu giữa các ứng dụng trong môi trường phân tán và có khả năng mở rộng.
+
+### 1.2. Ưu điểm của Apache Kafka
+- **Khả năng chịu tải cao**: Có thể mở rộng quy mô xử lý bằng cách thêm broker (máy chủ) vào cluster.
+- **Đảm bảo tính nhất quán**: Sử dụng mô hình log-based để đảm bảo thứ tự và không mất dữ liệu.
+- **Độ tin cậy cao**: Dữ liệu vẫn truy cập được khi một số broker gặp sự cố nhờ cơ chế sao chép (replication).
+- **Xử lý sự kiện thời gian thực**: Giúp ứng dụng phản ứng nhanh với các sự kiện quan trọng.
+
+### 1.3. Nhược điểm của Apache Kafka
+- **Phức tạp trong triển khai và quản lý**: Yêu cầu cấu hình chi tiết và kinh nghiệm vận hành.
+- **Yêu cầu nhiều tài nguyên hệ thống**: Tiêu tốn CPU, RAM, và dung lượng đĩa.
+- **Khó quản lý dữ liệu cũ**: Dữ liệu lưu trữ lâu dài có thể gây khó khăn trong việc duy trì.
+- **Dễ bị quá tải**: Nếu lưu trữ quá nhiều sự kiện không cần thiết, hệ thống có thể bị chậm.
+
+### 1.4. Kiến trúc của Apache Kafka
+Kiến trúc cơ bản của Kafka bao gồm các thành phần chính:
+
+- **Cluster**: Tập hợp nhiều máy chủ (broker) làm việc cùng nhau để cung cấp tính mở rộng, nhất quán và độ tin cậy.
+- **Broker**: Máy chủ chịu trách nhiệm xử lý và lưu trữ dữ liệu Kafka, quản lý các partition thuộc các topic.
+- **Topic**: Dữ liệu được phân loại thành các chủ đề (topic), mỗi topic là một luồng dữ liệu độc lập. Producer gửi dữ liệu đến topic, Consumer đọc dữ liệu từ topic.
+- **Partition**: Mỗi topic có thể chia thành nhiều partition để phân tán dữ liệu và tăng hiệu suất. Dữ liệu được ghi và đọc theo thứ tự trong mỗi partition, với mỗi partition được lưu trên một broker.
+- **Producer**: Thành phần gửi dữ liệu tới các topic trong Kafka.
+- **Consumer**: Thành phần đọc dữ liệu từ topic Kafka. Kafka đảm bảo mỗi bản ghi chỉ được đọc bởi một consumer duy nhất trong cùng một group.
+- **ZooKeeper**: Quản lý trạng thái các broker trong cluster Kafka, đảm bảo hoạt động ổn định và nhất quán.
+
+![Kiến trúc Apache Kafka](https://khoinda.io.vn/assets/images/kafka_architecture.drawio-29303c3c702118a824930f2fd50ba4a1.svg)
+*Hình 1: Sơ đồ kiến trúc Kafka, thể hiện Cluster với các Broker, Topic, Partition, Producer, Consumer, và ZooKeeper, với các mũi tên chỉ luồng dữ liệu.*
+
+### 1.5. Apache Kafka trong hệ thống
+Kafka hoạt động theo mô hình **publish-subscribe (Pub-Sub)** giống hệ thống message queue:
+- Dữ liệu được phân chia thành **Topic**, mỗi topic đại diện cho một loại dữ liệu cụ thể.
+- Mỗi topic được chia thành các **Partition**, chứa phần dữ liệu và được lưu trên các **Broker**. Mỗi bản ghi trong partition có một **offset** duy nhất để theo dõi vị trí.
+- **Producer** gửi bản ghi dữ liệu tới topic cụ thể.
+- **Consumer** đăng ký theo dõi topic và nhận dữ liệu, sử dụng offset để theo dõi tiến độ đọc.
+- Kafka hỗ trợ sao lưu dữ liệu trên nhiều broker để đảm bảo tính sẵn sàng và bảo mật.
+
+### 1.6. Tính năng mở rộng và sao lưu
+- Kafka sao lưu dữ liệu trên nhiều broker thông qua cơ chế replication.
+- Mỗi partition có thể có nhiều bản sao (replicas) được lưu trên các broker khác nhau, tăng độ tin cậy và khả năng khôi phục khi lỗi xảy ra.
+
+### 1.7. Kiến trúc Pub-Sub Messaging với Apache Kafka
+Kafka là giải pháp mạnh mẽ cho mô hình Pub-Sub, giúp trao đổi thông tin hiệu quả và đáng tin cậy. Quy trình hoạt động:
+- **Kafka Producer** gửi message đến **Topic**.
+- **Kafka Broker** lưu message vào các **Partition** được định cấu hình, phân phối cân bằng giữa các partition.
+- **Kafka Consumer** subscribe vào topic, nhận offset hiện tại từ ZooKeeper.
+- Consumer gửi request pull để lấy message mới, Kafka chuyển tiếp message ngay khi nhận được.
+- Sau khi xử lý, Consumer gửi xác nhận, Kafka cập nhật offset. Ngay cả khi broker gặp sự cố, Consumer vẫn đọc được message tiếp theo nhờ ZooKeeper.
+
+![Pub-Sub Messaging với Kafka](https://th.bing.com/th/id/R.ca101db423dda15ba71d093866a0fea0?rik=SLDjlJ29kqC5Jw&pid=ImgRaw&r=0)
+*Hình 2: Sơ đồ Pub-Sub, thể hiện luồng từ Producer qua Broker và Partition đến Consumer, với vai trò của ZooKeeper trong quản lý offset.*
+
+## 2. Spark Streaming
+
+### 2.1. Spark Streaming là gì?
+Spark Streaming là thành phần quan trọng của Apache Spark, cho phép xử lý dữ liệu trực tiếp và liên tục từ nhiều nguồn như Kafka, Flume, Kinesis, hoặc socket TCP/IP.
+
+### 2.2. Micro-batch Processing
+Spark Streaming sử dụng mô hình **micro-batch processing**, chia dòng dữ liệu thành các **micro-batch** và xử lý giống như dữ liệu tĩnh trong Spark.
+
+- **Dữ liệu đầu vào (Input Data Stream)**: Được thu thập từ các nguồn như Kafka, Flume, Kinesis, hoặc TCP socket, đến liên tục theo thời gian thực.
+- **Bộ chia micro-batch (Micro-batch Scheduler)**: Chia dữ liệu thành micro-batch theo khoảng thời gian cố định (ví dụ: 1 giây hoặc 5 giây), mỗi batch được biểu diễn bằng một RDD.
+- **Xử lý batch (RDD Transformation)**: Áp dụng các thao tác như `map`, `filter`, `reduceByKey`, `join`, hoặc `window` trên DStream.
+- **Đầu ra (Output Operations)**: Kết quả được ghi ra console, HDFS, cơ sở dữ liệu, hoặc đẩy vào hệ thống như Kafka, Elasticsearch.
+
+### 2.3. DStream
+**DStream (Discretized Stream)** là cấu trúc dữ liệu chính trong Spark Streaming, đại diện cho dòng dữ liệu liên tục.
+
+- Mỗi DStream là chuỗi các **RDDs**, mỗi RDD chứa dữ liệu của một micro-batch tại một thời điểm cụ thể.
+- Sơ đồ minh họa:
   ```
-  - Truy vấn này tổng hợp doanh thu theo tháng từ bảng dữ liệu giao dịch, thường được chạy trên Spark SQL hoặc Hive.
-- **ETL Pipeline**:
-  - **Extract**: Trích xuất dữ liệu từ file CSV trên HDFS.
+  DStream
+     │
+  ┌────┬────┬────┐
+  ▼    ▼    ▼
+  RDD(t1) RDD(t2) RDD(t3)
+  (micro-batch) (micro-batch) (micro-batch)
+  ```
+  - `t1`, `t2`, `t3`,... là mốc thời gian (ví dụ: mỗi 1 giây).
+  - Các RDD được xử lý tuần tự bằng các phép biến đổi.
 
+
+## 3. Kiến trúc Lambda
+
+### 3.1. Mục tiêu
+Kiến trúc Lambda cân bằng giữa độ trễ, thông lượng và khả năng chịu lỗi, kết hợp:
+- **Batch processing** để cung cấp chế độ xem toàn diện và chính xác.
+- **Stream processing** để cung cấp dữ liệu thời gian thực.
+
+### 3.2. Thành phần
+- **Lớp xử lý dữ liệu batch**:
+  - Tính toán trước kết quả sử dụng hệ thống phân tán (như Spark).
+  - Đảm bảo độ chính xác cao, sửa lỗi bằng cách tính toán lại toàn bộ dữ liệu.
+  - Kết quả lưu ở cơ sở dữ liệu chỉ đọc, thay thế dữ liệu cũ.
+- **Lớp xử lý dữ liệu speed (real-time)**:
+  - Xử lý dữ liệu thời gian thực, không yêu cầu sửa chữa.
+  - Hy sinh thông lượng để giảm độ trễ, dữ liệu có thể không đầy đủ.
+  - Được thay thế bởi batch khi hoàn tất.
+- **Lớp serving (phục vụ dữ liệu)**:
+  - Lưu trữ dữ liệu từ batch và speed.
+  - Đáp ứng truy vấn bằng dữ liệu đã xử lý sẵn.
+
+### 3.3. Ưu điểm và ứng dụng
+- Phổ biến trong dữ liệu lớn và phân tích thời gian thực.
+- Giảm độ trễ so với MapReduce truyền thống.
+
+![Kiến trúc Lambda](https://th.bing.com/th/id/R.e17f3ca1f503cd39f8f1fd0f0c7b2478?rik=uUY%2bO7BUxOkNOw&pid=ImgRaw&r=0)
+*Hình 4: Sơ đồ Kiến trúc Lambda, thể hiện luồng từ Batch Layer, Speed Layer, đến Serving Layer.*
+
+## 4. Kiến trúc Kappa
+
+### 4.1. Hạn chế của Kiến trúc Lambda
+- Cần duy trì hai mã nguồn riêng biệt (batch và real-time).
+- Phức tạp trong đồng bộ logic nghiệp vụ.
+
+### 4.2. Giải pháp: Kiến trúc Kappa
+- Được đề xuất bởi Jay Kreps, đồng sáng lập Apache Kafka.
+- **Ý tưởng chính**: Lưu toàn bộ dữ liệu nguồn vào Kafka, tái sử dụng logic stream để chạy lại trên dữ liệu cũ, thống nhất mã nguồn.
+- **Đặc điểm**: Lưu trữ dữ liệu nhiều năm trong Kafka, phù hợp với hệ thống cần xử lý dữ liệu lịch sử lớn.
+
+### 4.3. So sánh nhanh
+| Tiêu chí               | Lambda           | Kappa           |
+|------------------------|------------------|-----------------|
+| Số lượng hệ thống xử lý | 2 (batch + stream) | 1 (chỉ stream)  |
+| Mã nguồn xử lý         | Riêng biệt       | Thống nhất      |
+| Phức tạp               | Cao              | Thấp hơn        |
+| Hỗ trợ dữ liệu lịch sử | Có (batch)       | Có (Kafka)      |
+
+
+
+## 5. Streaming & Real-time Data
+
+### 5.1. Kiến trúc của Kafka
+- Dựa trên mô hình **kênh sự kiện (event channel)**, rất phù hợp cho streaming và xử lý thời gian thực.
+- **Kiến trúc cơ bản của mô hình kênh sự kiện**:
+  - Kênh sự kiện là trung gian, có tác tử theo dõi các thành viên.
+  - Các thành phần dịch vụ đăng ký với kênh, gửi yêu cầu, và kênh kết nối chúng để trao đổi.
+- Kafka phát triển mô hình này với **bộ đệm (buffer)** để tăng khả năng xử lý song song.
+
+### 5.2. Chi tiết quy trình của Kafka
+- Mỗi broker là một server xử lý yêu cầu.
+- Khi Producer/Consumer gửi yêu cầu, dữ liệu được lưu trong buffer.
+- Cơ chế phân tán cho phép các broker nhảy vào buffer để xử lý, tránh quá tải và tăng dự phòng nóng.
+
+### 5.3. Ưu điểm của Kafka
+- **Giảm thao tác đọc/ghi đĩa**: Lưu dữ liệu tạm trong buffer, ghi xuống đĩa khi đầy, giảm truy cập vật lý.
+- **Tăng độ tin cậy**: Buffer bảo vệ dữ liệu khi broker lỗi, khôi phục từ replicas.
+- **Cân bằng tải**: Phân phối yêu cầu hiệu quả, tránh quá tải broker.
+- **Đảm bảo thứ tự**: Giữ nguyên thứ tự message trong partition.
+
+### 5.4. Streaming Processing
+- Là mô hình xử lý dữ liệu thời gian thực hoặc gần thời gian thực.
+- Dữ liệu được xử lý ngay khi đến, khác với batch phải đợi định kỳ, sau đó lưu vào kho.
+- **Ứng dụng**: Chứng khoán, crypto, phân tích hành vi người dùng trực tuyến.
+- **Ưu điểm**:
+  - Phân tích dữ liệu gần như ngay lập tức, đưa ra quyết định nhanh.
+  - Cải thiện phản hồi, giảm độ trễ so với batch processing.
+  - Khả năng mở rộng và chịu lỗi cao.
+
+![Streaming Processing](https://raw.githubusercontent.com/minhnguyen2804/Bao-Cao-Thuc-Tap-Nguyen-Ngoc-Minh/refs/heads/main/image/streamprocess.png)
+*Hình 6: Sơ đồ Streaming Processing, thể hiện luồng từ nguồn dữ liệu đến xử lý thời gian thực.*
+
+# Tuần 5: Workflow & Integration
+# Tuần 6: Product Pipeline
