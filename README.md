@@ -624,8 +624,13 @@ BASE là mô hình thiết kế cho hệ thống NoSQL, ưu tiên khả năng m�
 ### 1.1. Apache Spark là gì?
 Apache Spark là một nền tảng tính toán phân tán mã nguồn mở, được thiết kế để xử lý dữ liệu lớn theo hai phương thức chính: **batch processing** (xử lý hàng loạt) và **streaming** (xử lý luồng). Spark nổi bật nhờ khả năng xử lý dữ liệu trong bộ nhớ (in-memory), giúp tăng tốc độ xử lý lên đến 100 lần so với Hadoop MapReduce trong một số trường hợp. Nó được sử dụng rộng rãi trong các ứng dụng như phân tích dữ liệu, học máy, xử lý đồ thị, và xử lý luồng thời gian thực.
 
-![Apache Spark Overview](https://www.apache.org/images/spark-logo.png)
-*Hình 1: Logo Apache Spark, một hình ảnh biểu tượng màu đen với chữ "Spark" được cách điệu, đại diện cho nền tảng xử lý dữ liệu lớn mạnh mẽ.*
+<div align="center">
+
+  <img src="https://tse2.mm.bing.net/th/id/OIP.CRlTR3rsel1ykr3Jb6CVQgHaD7?rs=1&pid=ImgDetMain&o=7&rm=3" alt="Apache Spark Overview" width="60%">
+
+  <p><em>Hình 1: Logo Apache Spark, một hình ảnh biểu tượng màu đen với chữ "Spark" được cách điệu, đại diện cho nền tảng xử lý dữ liệu lớn mạnh mẽ.</em></p>
+
+</div>
 
 **Đặc điểm chính**:
 - **In-Memory Computing**: Lưu trữ và xử lý dữ liệu trong RAM, chỉ ghi ra đĩa khi cần thiết, giảm đáng kể thời gian xử lý.
@@ -637,8 +642,13 @@ Apache Spark là một nền tảng tính toán phân tán mã nguồn mở, đ�
 ### 1.2. Các thành phần chính của Apache Spark
 Apache Spark cung cấp một hệ sinh thái mạnh mẽ với các module chính, mỗi module phục vụ một mục đích cụ thể trong xử lý dữ liệu:
 
-![Spark Components](https://databricks.com/wp-content/uploads/2023/01/spark-architecture-diagram.png)
-*Hình 2: Một sơ đồ minh họa các thành phần của Apache Spark, bao gồm Spark Core (lõi), Spark SQL (xử lý SQL), Spark Streaming (xử lý luồng), MLlib (học máy), và GraphX (xử lý đồ thị), được sắp xếp theo tầng lớp để thể hiện mối quan hệ giữa chúng.*
+<div align="center">
+
+  <img src="https://techvccloud.mediacdn.vn/280518386289090560/2021/7/26/apache-spark-3-16272746922751044587352.jpg" alt="Spark Components" width="70%">
+
+  <p><em>Hình 2: Một sơ đồ minh họa các thành phần của Apache Spark, bao gồm Spark Core (lõi), Spark SQL (xử lý SQL), Spark Streaming (xử lý luồng), MLlib (học máy), và GraphX (xử lý đồ thị), được sắp xếp theo tầng lớp để thể hiện mối quan hệ giữa chúng.</em></p>
+
+</div>
 
 1. **Spark Core**: Lõi của Spark, cung cấp các chức năng cơ bản như quản lý bộ nhớ, lập lịch task, xử lý lỗi, và tương tác với các hệ thống lưu trữ (HDFS, S3, v.v.).
 2. **Spark SQL**: Hỗ trợ xử lý dữ liệu có cấu trúc và bán cấu trúc thông qua SQL, DataFrame, và Dataset API. Tích hợp với các nguồn dữ liệu như Hive, JSON, Parquet.
